@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:spring="http://www.mulesoft.org/schema/mule/spring" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:tracing="http://www.mulesoft.org/schema/mule/tracing" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/tracing http://www.mulesoft.org/schema/mule/tracing/current/mule-tracing.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="62335b76-d78b-466f-b8fb-6e27c4642378" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<spring:config name="Spring_Config" doc:name="Spring Config" doc:id="eeed26da-037e-4c41-91bd-a03853ab9fd7" files="beans.xml" />
+	<flow name="invokeStatic-java-from-mule" doc:id="98031702-b0cd-4141-a534-d7b348201670" >
+		<http:listener doc:name="Listener" doc:id="e65e1eb8-b081-475b-838e-7fb674601615" config-ref="HTTP_Listener_config" path="/testInvoke"/>
+		<java:invoke-static doc:name="Invoke static" doc:id="4ae573bf-af00-4c05-8327-91a5953fa582" class="com.mulebytes.java.InvokeJavaFromMule" method="returnMessage(java.lang.String)">
+			<java:args ><![CDATA[#[{
+	name: attributes.queryParams.name default "Jagadishwar"
+}]]]></java:args>
+		</java:invoke-static>
+	</flow>
+	<flow name="invokeNONStatic-java-from-mule" doc:id="0ebfc9e0-e2b3-4a8f-9a6a-e623b5118269" >
+		<http:listener doc:name="Listener" doc:id="d1f646ab-0ad2-4d94-a725-8d8c93c33d36" config-ref="HTTP_Listener_config" path="/testInvokeNoStatic" />
+		<java:new constructor="InvokeNonStaticJavaFromMule()" doc:name="New (Set: nonStaticMethodClassInstance)" doc:id="ec38d429-21ed-4d24-95ec-360ff3010b3b" class="com.mulebytes.java.InvokeNonStaticJavaFromMule" target="nonStaticMethodClassInstance"/>
+		<java:invoke doc:name="Invoke" doc:id="895efb9b-a29c-41de-b477-30176846f50f" instance="#[vars.nonStaticMethodClassInstance]" class="com.mulebytes.java.InvokeNonStaticJavaFromMule" method="returnMessage(java.lang.String)">
+			<java:args ><![CDATA[#[{
+	name: attributes.queryParams.name default "Jagadishwar"
+}]]]></java:args>
+		</java:invoke>
+	</flow>
+	<flow name="invokeNONStaticSpring-java-from-mule" doc:id="c4b58261-dffd-4259-a4a6-5055fdc6ff5b" >
+		<http:listener doc:name="Listener" doc:id="e167e71f-4a39-41aa-a61f-fd2ca30b0a04" config-ref="HTTP_Listener_config" path="/testInvokeNoStaticSpring" />
+		<java:invoke method="returnMessage(java.lang.String)" doc:name="Invoke" doc:id="36443b22-357f-4a6c-a102-92d7d9429db5" instance="invokeNonStaticJavaFromMuleInstance" class="com.mulebytes.java.InvokeNonStaticJavaFromMule" >
+			<java:args ><![CDATA[#[{
+	name: attributes.queryParams.name default "Jagadishwar"
+}]]]></java:args>
+		</java:invoke>
+	</flow>
+</mule>
